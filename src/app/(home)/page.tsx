@@ -1,18 +1,23 @@
+import HomeView from "@/modules/home/ui/views/home-view";
 import { HydrateClient, trpc } from "@/trpc/server";
-import { ErrorBoundary } from "react-error-boundary";
-import { Suspense } from "react";
-import { PageClient } from "./client";
 
-export default async function Home() {
-  void await trpc.hello.prefetch({ text: "Fawad" });
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  searchParams: Promise<{
+    categoryId?: string
+  }>
+}
+
+const Page = async ({ searchParams }: PageProps) => {
+  const { categoryId } = await searchParams;
+  void trpc.categories.getMany.prefetch();
 
   return (
     <HydrateClient>
-      <Suspense fallback={<div>loading...</div>}>
-        <ErrorBoundary fallback={<div>error</div>}>
-          <PageClient />
-        </ErrorBoundary>
-      </Suspense>
+      <HomeView categoryId={categoryId} />
     </HydrateClient>
   );
 }
+
+export default Page;
